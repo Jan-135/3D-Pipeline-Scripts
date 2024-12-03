@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Export to FBX for Unreal Engine",
     "author": "Jan Ferber",
-    "version": (1, 1),
+    "version": (1, 2),
     "blender": (4, 2, 2),
     "location": "View3d > Tool",
     "warning": "",
@@ -13,58 +13,54 @@ bl_info = {
 import bpy
 import os
 
-# Liste der Charaktere für das Dropdown-Menü
+# List of characters for the dropdown menu
 character_options = [
     ("Maurice", "Maurice", ""),
     ("Mother_Golem", "Golem Mutter", ""),
-    ("Bird", "Vöglein vöglein", ""),
-    ("Testosteron", "Testosteron", ""),
+    ("Bird", "Vogel", ""),
+    # One test folder for each character
+    ("Test", "Test", ""),
 ]
 
-# Liste der Szenen für das Dropdown-Menü
-scene_options = [
-    ("Szene002", "scene002", ""),
-    ("Szene003", "scene003", ""),
-    ("Szene004", "scene004", ""),
-    ("Szene005", "scene005", ""),
-    ("Szene006", "scene006", ""),
-    ("Szene007", "scene007", ""),
-    ("Szene008", "scene008", ""),
-    ("Szene009", "scene009", ""),
-    ("Szene010", "scene010", ""),
-    ("Szene011", "scene011", ""),
-    ("Szene012", "scene012", ""),
-    ("Szene013", "scene013", ""),
-    ("Szene014", "scene014", ""),
-    ("Szene015", "scene015", ""),
-    ("Szene016", "scene016", ""),
-    ("Szene017", "scene017", ""),
-    ("Szene018", "scene018", ""),
-    ("Szene019", "scene019", ""),
-    ("Testosteron", "testosteron", ""),
-]
+# List of scenes for the dropdown menu
+# Dynamische Erstellung der Szenen-Optionen mit einer Schleife
+scene_options = [(f"Szene {i:03d}", f"scene{i:03d}", "") for i in range(2, 20)]
+# One test folder for each scene
+scene_options.append(("Test", "Test", ""))
 
-# Property für die Charakterauswahl
+
+# EnumProperty for character selection in the UI
 bpy.types.Scene.character_selector = bpy.props.EnumProperty(
     name="Select Character",
     description="Choose the character for the animation export",
     items=character_options,
 )
 
-# Property für die Szenenauswahl
+# EnumProperty for scene selection in the UI
 bpy.types.Scene.scene_selector = bpy.props.EnumProperty(
     name="Select Scene",
     description="Choose the scene for the animation export",
     items=scene_options,
 )
 
-# Funktion zur Berechnung der nächsten Version
 def get_next_version(export_path, character, scene):
-    # Zählt die Anzahl der Dateien im Zielordner, die mit dem Charakter und der Szene beginnen
+    """
+    Determines the next available version number for the export file.
+    
+    Args:
+        export_path (str): The base directory for exports.
+        character (str): The selected character.
+        scene (str): The selected scene.
+
+    Returns:
+        int: The next version number.
+    """
+    
+    # Gather existing files that match the naming pattern
     existing_files = [f for f in os.listdir(export_path) if f.startswith(f"{character}_{scene}_v")]
     version_numbers = []
 
-    # Extrahiere die Versionsnummern aus den Dateinamen
+    # Extract version numbers from filenames
     for file in existing_files:
         parts = file.split('_')
         if len(parts) > 2 and parts[2].startswith('v'):
@@ -73,44 +69,43 @@ def get_next_version(export_path, character, scene):
             except ValueError:
                 continue
 
-    # Falls keine Versionen gefunden wurden, starte mit Version 1
-    if not version_numbers:
-        return 1
+    # Return 1 if no versions exist, otherwise increment the highest version
+    return max(version_numbers, default=0) + 1
 
-    # Die nächste Version ist die größte existierende Version + 1
-    return max(version_numbers) + 1
 
-# Operator zum Exportieren nach FBX mit spezifischen Einstellungen
 class ExportToFBXOperator(bpy.types.Operator):
+    """
+    Operator to export selected animations to FBX for Unreal Engine.
+    """
     bl_idname = "export_scene.fbx_unreal"
     bl_label = "Export to FBX for Unreal"
 
     def execute(self, context):
-        # Charakter und Szene aus der Dropdown-Auswahl abfragen
+        # Get selected character and scene from dropdown menus
         selected_character = context.scene.character_selector
         selected_scene = context.scene.scene_selector
 
-        # Basis-Exportpfad
+        # Define base path and create subdirectories for character and scene
         base_path = "N:/GOLEMS_FATE/animations"
-        # Charakter- und Szenen-Unterordner erstellen
+
         export_path = os.path.join(base_path, selected_character, selected_scene)
         if not os.path.exists(export_path):
             os.makedirs(export_path)
 
-        # Berechne die nächste Version
+        # Determine the next version for the file
         version = get_next_version(export_path, selected_character, selected_scene)
 
-        # Vollständiger Exportpfad inklusive Dateiname mit Versionierung
+        # Construct the full export file path with versioning
         export_file_name = f"{selected_character}_{selected_scene}_v{version}.fbx"
         export_file_path = os.path.join(export_path, export_file_name)
 
-        # Überprüfen, ob die Datei bereits existiert
+       # Ensure file does not overwrite an existing one
         while os.path.exists(export_file_path):
             version += 1  # Version um 1 erhöhen
             export_file_name = f"{selected_character}_{selected_scene}_v{version}.fbx"
             export_file_path = os.path.join(export_path, export_file_name)
 
-        # Export-Einstellungen für Unreal Engine
+        # Perform FBX export with specified settings
         bpy.ops.export_scene.fbx(
             filepath=export_file_path,           # Exportpfad
             use_selection=True,                  # Nur ausgewählte Objekte exportieren
@@ -132,8 +127,12 @@ class ExportToFBXOperator(bpy.types.Operator):
         self.report({'INFO'}, f"Export nach FBX für {selected_character} in {selected_scene} erfolgreich!")
         return {'FINISHED'}
 
-# Benutzeroberfläche des Add-ons
+
 class ExportFBXPanel(bpy.types.Panel):
+    """
+    UI Panel for exporting animations to FBX.
+    """
+    
     bl_label = "Export to FBX for Unreal"
     bl_idname = "PT_ExportFBXPanel"
     bl_space_type = 'VIEW_3D'
@@ -145,18 +144,14 @@ class ExportFBXPanel(bpy.types.Panel):
         
         layout.label(text="Sei glücklich mit dem was du hast.", icon='FUND')
         
-        # Label für die Charakter-Auswahl
+        # Dropdown menus for character and scene selection
         layout.prop(context.scene, "character_selector", text="Character")  # Dropdown für Charakterauswahl
-
-        # Label für die Szenen-Auswahl
         layout.prop(context.scene, "scene_selector", text="Szene:")      # Dropdown für Szenenauswahl
         
-        # Label für den Export-Button
+        # Button to trigger the export
         row = layout.row()
         row.operator("export_scene.fbx_unreal", text="Exportiere Animation als FBX für Unreal")  # Export-Button
 
-
-# Registrierung des Panels und Operators
 def register():
     bpy.utils.register_class(ExportToFBXOperator)
     bpy.utils.register_class(ExportFBXPanel)
