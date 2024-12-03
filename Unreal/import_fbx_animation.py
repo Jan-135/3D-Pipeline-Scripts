@@ -4,14 +4,26 @@ import re
 
 def extract_version(filename):
     """
-    Extrahiert die Versionsnummer im Format 'v<number>' aus dem Dateinamen.
+    Extracts the version number in the format 'v<number>' from the filename.
+    
+    Args:
+        filename (str): The name of the file to extract the version from.
+        
+    Returns:
+        int: The version number if found, otherwise -1.
     """
     match = re.search(r"v(\d+)(?=\.\w+$)", filename)
     return int(match.group(1)) if match else -1
 
 def find_latest_version(files):
     """
-    Findet die Datei mit der höchsten Versionsnummer in einer Liste von Dateien.
+    Finds the file with the highest version number from a list of files.
+    
+    Args:
+        files (list): List of file names to check for the latest version.
+        
+    Returns:
+        str or None: The file name of the latest version, or None if no versioned files are found.
     """
     latest_file = None
     highest_version = -1
@@ -24,22 +36,28 @@ def find_latest_version(files):
 
 def create_unreal_folders(source_path, unreal_base_path):
     """
-    Erstellt die gleiche Ordnerstruktur in Unreal wie auf der Festplatte
-    und importiert nur die neueste Version, falls sie nicht bereits importiert wurde.
+    Creates the same folder structure in Unreal as on the disk and imports only the latest version of files, 
+    if not already imported.
+    
+    Args:
+        source_path (str): The root folder on the disk containing the assets.
+        unreal_base_path (str): The base folder path in Unreal where assets will be imported.
     """
+    # Iterate through each character folder in the source path
     for character_folder in os.listdir(source_path):
         character_path = os.path.join(source_path, character_folder)
         if os.path.isdir(character_path):
             character_unreal_path = f"{unreal_base_path}/{character_folder}"
             create_folder_if_not_exists(character_unreal_path)
             
+            # Iterate through each scene folder in the character folder
             for scene_folder in os.listdir(character_path):
                 scene_path = os.path.join(character_path, scene_folder)
                 if os.path.isdir(scene_path):
                     scene_unreal_path = f"{character_unreal_path}/{scene_folder}"
                     create_folder_if_not_exists(scene_unreal_path)
 
-                    # Finde die neueste Version und importiere sie
+                    # Find the latest version of the animation files and import them
                     animation_files = [f for f in os.listdir(scene_path) if f.endswith(".fbx")]
                     latest_file = find_latest_version(animation_files)
                     if latest_file:
@@ -48,32 +66,41 @@ def create_unreal_folders(source_path, unreal_base_path):
                         if not unreal.EditorAssetLibrary.does_asset_exist(unreal_asset_path):
                             import_fbx_to_unreal(scene_unreal_path, latest_file, animation_path)
                         else:
-                            print(f"Neueste Version bereits importiert: {latest_file}")
+                            print(f"Latest version already imported: {latest_file}")
 
 def create_folder_if_not_exists(folder_path):
     """
-    Erstellt den Ordner in Unreal, falls er noch nicht existiert.
+    Creates the specified folder in Unreal if it does not already exist.
+    
+    Args:
+        folder_path (str): The path of the folder to create in Unreal.
     """
     if not unreal.EditorAssetLibrary.does_directory_exist(folder_path):
         unreal.EditorAssetLibrary.make_directory(folder_path)
-        print(f"Ordner erstellt: {folder_path}")
+        print(f"Folder created: {folder_path}")
     else:
-        print(f"Ordner existiert bereits: {folder_path}")
+        print(f"Folder already exists: {folder_path}")
 
 def import_fbx_to_unreal(unreal_asset_path, animation_file, fbx_file_path):
     """
-    Importiert die angegebene FBX-Datei nach Unreal und entfernt die Versionierung aus dem Asset-Namen.
+    Imports the specified FBX file into Unreal and removes the versioning from the asset name.
+    
+    Args:
+        unreal_asset_path (str): The path in Unreal where the asset should be imported.
+        animation_file (str): The name of the FBX file to import.
+        fbx_file_path (str): The file path to the FBX file on disk.
     """
-    # Entferne die Versionierung (z. B. 'v1', 'v2') aus dem Dateinamen
-    base_name = re.sub(r"_v\d+$", "", animation_file[:-4])  # Entfernt '_v<number>' am Ende
+    # Remove versioning (e.g., 'v1', 'v2') from the file name
+    base_name = re.sub(r"_v\d+$", "", animation_file[:-4])  # Removes '_v<number>' at the end
 
+    # Set up the import task
     task = unreal.AssetImportTask()
-    task.filename = fbx_file_path  # Pfad zur Datei auf der Festplatte
-    task.destination_path = unreal_asset_path  # Zielordner in Unreal
-    task.destination_name = f"anim_{base_name}"  # Name des Assets ohne Versionierung
-    task.replace_existing = True  # Überschreibt bestehende Assets mit gleichem Namen, falls nötig
+    task.filename = fbx_file_path  # Path to the FBX file on disk
+    task.destination_path = unreal_asset_path  # The target folder in Unreal
+    task.destination_name = f"anim_{base_name}"  # The name of the asset without versioning
+    task.replace_existing = True  # Overwrite existing assets if necessary
 
-    # Definiere Import-Optionen mit FbxImportUI
+    # Define import options with FbxImportUI
     import_ui = unreal.FbxImportUI()
     import_ui.set_editor_property("import_as_skeletal", False)
     import_ui.set_editor_property("import_materials", True)
@@ -82,18 +109,17 @@ def import_fbx_to_unreal(unreal_asset_path, animation_file, fbx_file_path):
 
     task.options = import_ui
 
-    # Importiere die Datei
+    # Execute the import task
     asset_tools = unreal.AssetToolsHelpers.get_asset_tools()
     asset_tools.import_asset_tasks([task])
 
-    print(f"Import abgeschlossen: {fbx_file_path} als {task.destination_name} in {unreal_asset_path}")
+    print(f"Import complete: {fbx_file_path} as {task.destination_name} into {unreal_asset_path}")
 
 
-
-# Beispiel: Quelle ist der lokale Ordner und Ziel ist der Unreal-Ordner
+# Example: Source is the local folder and the target is the Unreal folder
 source_path = "N:/GOLEMS_FATE/animations"
 unreal_base_path = "/Game/ASSETS/Animations"
 
-# Struktur erstellen und importieren
+# Create folders and import the latest version of assets
 create_unreal_folders(source_path, unreal_base_path)
-print("Erfolgreich abgeschlossen!")
+print("Completed successfully!")
