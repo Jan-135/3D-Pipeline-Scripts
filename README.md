@@ -63,5 +63,3 @@ While the repository is accessible, its scripts assume familiarity with the corr
 ## License
 
 This project is released into the public domain. You are free to use, modify, and distribute the code in this repository for any purpose, without any restrictions.
-
-This is a new line to check if my vscode is set up correctly.
