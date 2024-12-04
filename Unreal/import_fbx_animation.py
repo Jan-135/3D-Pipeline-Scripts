@@ -43,21 +43,18 @@ def create_unreal_folders(source_path, unreal_base_path):
         source_path (str): The root folder on the disk containing the assets.
         unreal_base_path (str): The base folder path in Unreal where assets will be imported.
     """
-    # Iterate through each character folder in the source path
     for character_folder in os.listdir(source_path):
         character_path = os.path.join(source_path, character_folder)
         if os.path.isdir(character_path):
             character_unreal_path = f"{unreal_base_path}/{character_folder}"
             create_folder_if_not_exists(character_unreal_path)
             
-            # Iterate through each scene folder in the character folder
             for scene_folder in os.listdir(character_path):
                 scene_path = os.path.join(character_path, scene_folder)
                 if os.path.isdir(scene_path):
                     scene_unreal_path = f"{character_unreal_path}/{scene_folder}"
                     create_folder_if_not_exists(scene_unreal_path)
 
-                    # Find the latest version of the animation files and import them
                     animation_files = [f for f in os.listdir(scene_path) if f.endswith(".fbx")]
                     latest_file = find_latest_version(animation_files)
                     if latest_file:
@@ -90,17 +87,14 @@ def import_fbx_to_unreal(unreal_asset_path, animation_file, fbx_file_path):
         animation_file (str): The name of the FBX file to import.
         fbx_file_path (str): The file path to the FBX file on disk.
     """
-    # Remove versioning (e.g., 'v1', 'v2') from the file name
-    base_name = re.sub(r"_v\d+$", "", animation_file[:-4])  # Removes '_v<number>' at the end
+    base_name = re.sub(r"_v\d+$", "", animation_file[:-4]) 
 
-    # Set up the import task
     task = unreal.AssetImportTask()
-    task.filename = fbx_file_path  # Path to the FBX file on disk
-    task.destination_path = unreal_asset_path  # The target folder in Unreal
-    task.destination_name = f"anim_{base_name}"  # The name of the asset without versioning
-    task.replace_existing = True  # Overwrite existing assets if necessary
+    task.filename = fbx_file_path  
+    task.destination_path = unreal_asset_path
+    task.destination_name = f"anim_{base_name}"  
+    task.replace_existing = True 
 
-    # Define import options with FbxImportUI
     import_ui = unreal.FbxImportUI()
     import_ui.set_editor_property("import_as_skeletal", False)
     import_ui.set_editor_property("import_materials", True)
@@ -109,17 +103,14 @@ def import_fbx_to_unreal(unreal_asset_path, animation_file, fbx_file_path):
 
     task.options = import_ui
 
-    # Execute the import task
     asset_tools = unreal.AssetToolsHelpers.get_asset_tools()
     asset_tools.import_asset_tasks([task])
 
     print(f"Import complete: {fbx_file_path} as {task.destination_name} into {unreal_asset_path}")
 
+if __name__ == "__main__":
+    source_path = "N:/GOLEMS_FATE/animations"
+    unreal_base_path = "/Game/ASSETS/Animations"
 
-# Example: Source is the local folder and the target is the Unreal folder
-source_path = "N:/GOLEMS_FATE/animations"
-unreal_base_path = "/Game/ASSETS/Animations"
-
-# Create folders and import the latest version of assets
-create_unreal_folders(source_path, unreal_base_path)
-print("Completed successfully!")
+    create_unreal_folders(source_path, unreal_base_path)
+    print("Completed successfully!")

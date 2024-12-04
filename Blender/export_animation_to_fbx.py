@@ -13,30 +13,23 @@ bl_info = {
 import bpy
 import os
 
-# List of characters for the dropdown menu
 character_options = [
     ("Maurice", "Maurice", ""),
     ("Mother_Golem", "Golem Mutter", ""),
     ("Bird", "Vogel", ""),
-    # One test folder for each character
     ("Test", "Test", ""),
 ]
 
-# List of scenes for the dropdown menu
-# Dynamische Erstellung der Szenen-Optionen mit einer Schleife
 scene_options = [(f"Szene {i:03d}", f"scene{i:03d}", "") for i in range(2, 20)]
-# One test folder for each scene
 scene_options.append(("Test", "Test", ""))
 
 
-# EnumProperty for character selection in the UI
 bpy.types.Scene.character_selector = bpy.props.EnumProperty(
     name="Select Character",
     description="Choose the character for the animation export",
     items=character_options,
 )
 
-# EnumProperty for scene selection in the UI
 bpy.types.Scene.scene_selector = bpy.props.EnumProperty(
     name="Select Scene",
     description="Choose the scene for the animation export",
@@ -56,20 +49,14 @@ def get_next_version(export_path, character, scene):
         int: The next version number.
     """
     
-    # Gather existing files that match the naming pattern
     existing_files = [f for f in os.listdir(export_path) if f.startswith(f"{character}_{scene}_v")]
     version_numbers = []
 
-    # Extract version numbers from filenames
     for file in existing_files:
         parts = file.split('_')
         if len(parts) > 2 and parts[2].startswith('v'):
-            try:
-                version_numbers.append(int(parts[2][1:]))  # Nummer nach 'v' extrahieren
-            except ValueError:
-                continue
+            version_numbers.append(int(parts[2][1:]))
 
-    # Return 1 if no versions exist, otherwise increment the highest version
     return max(version_numbers, default=0) + 1
 
 
@@ -81,47 +68,41 @@ class ExportToFBXOperator(bpy.types.Operator):
     bl_label = "Export to FBX for Unreal"
 
     def execute(self, context):
-        # Get selected character and scene from dropdown menus
         selected_character = context.scene.character_selector
         selected_scene = context.scene.scene_selector
 
-        # Define base path and create subdirectories for character and scene
         base_path = "N:/GOLEMS_FATE/animations"
 
         export_path = os.path.join(base_path, selected_character, selected_scene)
         if not os.path.exists(export_path):
             os.makedirs(export_path)
 
-        # Determine the next version for the file
         version = get_next_version(export_path, selected_character, selected_scene)
 
-        # Construct the full export file path with versioning
         export_file_name = f"{selected_character}_{selected_scene}_v{version}.fbx"
         export_file_path = os.path.join(export_path, export_file_name)
 
-       # Ensure file does not overwrite an existing one
         while os.path.exists(export_file_path):
-            version += 1  # Version um 1 erhöhen
+            version += 1
             export_file_name = f"{selected_character}_{selected_scene}_v{version}.fbx"
             export_file_path = os.path.join(export_path, export_file_name)
 
-        # Perform FBX export with specified settings
         bpy.ops.export_scene.fbx(
-            filepath=export_file_path,           # Exportpfad
-            use_selection=True,                  # Nur ausgewählte Objekte exportieren
-            apply_scale_options='FBX_SCALE_NONE', # Skalierungsoption
-            bake_anim=True,                      # Animationen backen
-            bake_anim_use_all_bones=True,        # Alle Bones in der Animation verwenden
-            bake_anim_use_nla_strips=False,      # NLA-Strips ignorieren
-            bake_anim_use_all_actions=False,     # Alle Actions backen
-            bake_anim_force_startend_keying=True,# Keyframes am Anfang und Ende setzen
-            object_types={'ARMATURE'},           # Nur Armatures exportieren
-            mesh_smooth_type='OFF',              # Smoothing-Option
-            use_armature_deform_only=False,      # Nur deformierende Bones exportieren
-            add_leaf_bones=False,                # Leaf-Bones weglassen
-            axis_forward='X',                    # Achsen-Konfiguration
-            axis_up='Z',                          # Achsen-Konfiguration
-            global_scale=1.0                     # Setze den globalen Skalierungsfaktor auf 1.0
+            filepath=export_file_path,           
+            use_selection=True,                  
+            apply_scale_options='FBX_SCALE_NONE',
+            bake_anim=True,                      
+            bake_anim_use_all_bones=True,        
+            bake_anim_use_nla_strips=False,      
+            bake_anim_use_all_actions=False,     
+            bake_anim_force_startend_keying=True,
+            object_types={'ARMATURE'},           
+            mesh_smooth_type='OFF',              
+            use_armature_deform_only=False,      
+            add_leaf_bones=False,                
+            axis_forward='X',                    
+            axis_up='Z',                         
+            global_scale=1.0                     
         )
         
         self.report({'INFO'}, f"Export nach FBX für {selected_character} in {selected_scene} erfolgreich!")
@@ -144,11 +125,8 @@ class ExportFBXPanel(bpy.types.Panel):
         
         layout.label(text="Sei glücklich mit dem was du hast.", icon='FUND')
         
-        # Dropdown menus for character and scene selection
-        layout.prop(context.scene, "character_selector", text="Character")  # Dropdown für Charakterauswahl
-        layout.prop(context.scene, "scene_selector", text="Szene:")      # Dropdown für Szenenauswahl
-        
-        # Button to trigger the export
+        layout.prop(context.scene, "character_selector", text="Character")  
+        layout.prop(context.scene, "scene_selector", text="Szene:")
         row = layout.row()
         row.operator("export_scene.fbx_unreal", text="Exportiere Animation als FBX für Unreal")  # Export-Button
 
