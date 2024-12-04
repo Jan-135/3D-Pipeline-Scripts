@@ -8,7 +8,6 @@ bl_info = {
     "wiki_url": "",
     "category": "Export Animation",
 }
-#Hier ist ein Test
 
 import bpy
 import os
