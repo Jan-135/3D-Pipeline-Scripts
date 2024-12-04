@@ -3,7 +3,7 @@ import maya.mel as mel
 import pymel.core as pc
 import os
 
-def export_fbx(export_path, file_name):
+def export_fbx(export_path: str, file_name: str) -> None:
     """
     Exports the selected objects as an FBX file to the specified path.
     
@@ -14,7 +14,7 @@ def export_fbx(export_path, file_name):
     if not os.path.exists(export_path):
         os.makedirs(export_path)
 
-    full_path = os.path.join(export_path, file_name)
+    full_path: str = os.path.join(export_path, file_name)
 
     mel.eval('FBXExportAnimationOnly -v true;') 
     mel.eval('FBXExportBakeComplexAnimation -v true;')
@@ -26,7 +26,7 @@ def export_fbx(export_path, file_name):
         print(f"Failed to export FBX: {e}")
 
 
-def get_next_version(export_path, base_name):
+def get_next_version(export_path: str, base_name: str) -> int:
     """
     Determines the next version number for an export file based on existing files in the directory.
     
@@ -37,27 +37,29 @@ def get_next_version(export_path, base_name):
     Returns:
         int: The next available version number.
     """
-    files = [f for f in os.listdir(export_path) if f.startswith(base_name) and f.endswith(".fbx")]
-    version_numbers = []
+    files: list[str] = [
+        f for f in os.listdir(export_path)
+        if f.startswith(base_name) and f.endswith(".fbx")
+    ]
+    version_numbers: list[int] = []
 
     for file in files:
-        parts = file.split("_")
+        parts: list[str] = file.split("_")
         if len(parts) > 1 and parts[-1].startswith("v"):
-            version = int(parts[-1][1:].split(".")[0])
+            version: int = int(parts[-1][1:].split(".")[0])
             version_numbers.append(version)
-
 
     return max(version_numbers, default=0) + 1
 
 
-def create_export_ui():
+def create_export_ui() -> None:
     """
     Creates a simple UI in Maya to select a character and scene, and export the animation as an FBX file.
     """
     if cmds.window("ExportUI", exists=True):
         cmds.deleteUI("ExportUI", window=True)
 
-    window = cmds.window("ExportUI", title="Export FBX for Unreal", widthHeight=(300, 150))
+    window: str = cmds.window("ExportUI", title="Export FBX for Unreal", widthHeight=(300, 150))
     cmds.columnLayout(adjustableColumn=True)
 
     cmds.optionMenu("character_menu", label="Character")
@@ -68,7 +70,7 @@ def create_export_ui():
 
     cmds.optionMenu("scene_menu", label="Scene")
     for i in range(1, 21):  
-        scene_label = f"Scene {i:03}" 
+        scene_label: str = f"Scene {i:03}" 
         cmds.menuItem(label=scene_label)
 
     cmds.button(label="Export FBX", command=lambda x: on_export_clicked())
@@ -76,16 +78,16 @@ def create_export_ui():
     cmds.showWindow(window)
 
 
-def on_export_clicked():
+def on_export_clicked() -> None:
     """
     Callback function triggered when the 'Export FBX' button is clicked.
     It retrieves user selections, prepares the export path, and calls the export function.
     """
-    character = cmds.optionMenu("character_menu", query=True, value=True)
-    scene = cmds.optionMenu("scene_menu", query=True, value=True)
+    character: str = cmds.optionMenu("character_menu", query=True, value=True)
+    scene: str = cmds.optionMenu("scene_menu", query=True, value=True)
 
-    base_path = "N:/GOLEMS_FATE/animations"
-    export_path = os.path.join(base_path, character, scene)
+    base_path: str = "N:/GOLEMS_FATE/animations"
+    export_path: str = os.path.join(base_path, character, scene)
 
     print(f"Attempting to export to: {export_path}")
 
@@ -95,8 +97,8 @@ def on_export_clicked():
         print(f"Error creating directory: {e}")
         return
 
-    version = get_next_version(export_path, f"{character}_{scene}")
-    file_name = f"{character}_{scene}_v{version}.fbx"
+    version: int = get_next_version(export_path, f"{character}_{scene}")
+    file_name: str = f"{character}_{scene}_v{version}.fbx"
 
     export_fbx(export_path, file_name)
 

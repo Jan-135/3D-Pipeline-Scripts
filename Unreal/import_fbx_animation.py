@@ -1,8 +1,10 @@
 import unreal
 import os
 import re
+from typing import List, Optional
 
-def extract_version(filename):
+
+def extract_version(filename: str) -> int:
     """
     Extracts the version number in the format 'v<number>' from the filename.
     
@@ -15,12 +17,13 @@ def extract_version(filename):
     match = re.search(r"v(\d+)(?=\.\w+$)", filename)
     return int(match.group(1)) if match else -1
 
-def find_latest_version(files):
+
+def find_latest_version(files: List[str]) -> Optional[str]:
     """
     Finds the file with the highest version number from a list of files.
     
     Args:
-        files (list): List of file names to check for the latest version.
+        files (List[str]): List of file names to check for the latest version.
         
     Returns:
         str or None: The file name of the latest version, or None if no versioned files are found.
@@ -34,7 +37,8 @@ def find_latest_version(files):
             latest_file = file
     return latest_file
 
-def create_unreal_folders(source_path, unreal_base_path):
+
+def create_unreal_folders(source_path: str, unreal_base_path: str) -> None:
     """
     Creates the same folder structure in Unreal as on the disk and imports only the latest version of files, 
     if not already imported.
@@ -65,7 +69,8 @@ def create_unreal_folders(source_path, unreal_base_path):
                         else:
                             print(f"Latest version already imported: {latest_file}")
 
-def create_folder_if_not_exists(folder_path):
+
+def create_folder_if_not_exists(folder_path: str) -> None:
     """
     Creates the specified folder in Unreal if it does not already exist.
     
@@ -78,7 +83,8 @@ def create_folder_if_not_exists(folder_path):
     else:
         print(f"Folder already exists: {folder_path}")
 
-def import_fbx_to_unreal(unreal_asset_path, animation_file, fbx_file_path):
+
+def import_fbx_to_unreal(unreal_asset_path: str, animation_file: str, fbx_file_path: str) -> None:
     """
     Imports the specified FBX file into Unreal and removes the versioning from the asset name.
     
@@ -108,9 +114,10 @@ def import_fbx_to_unreal(unreal_asset_path, animation_file, fbx_file_path):
 
     print(f"Import complete: {fbx_file_path} as {task.destination_name} into {unreal_asset_path}")
 
+
 if __name__ == "__main__":
-    source_path = "N:/GOLEMS_FATE/animations"
-    unreal_base_path = "/Game/ASSETS/Animations"
+    source_path: str = "N:/GOLEMS_FATE/animations"
+    unreal_base_path: str = "/Game/ASSETS/Animations"
 
     create_unreal_folders(source_path, unreal_base_path)
     print("Completed successfully!")

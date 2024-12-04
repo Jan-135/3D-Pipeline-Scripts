@@ -1,14 +1,13 @@
 import json
 import os
 from pathlib import Path
-
 import unreal
-
 from tkinter import Tk, Label, Button, filedialog, simpledialog
 from tkinter.ttk import *
+from typing import Dict, Optional
 
 
-def get_material_map(path):
+def get_material_map(path: Path) -> Dict:
     """
     Loads the material mapping from a JSON file.
     
@@ -20,7 +19,8 @@ def get_material_map(path):
     """
     return json.load(path.open())
 
-def get_file_location(object, channel, object_to_material_map):
+
+def get_file_location(object: str, channel: str, object_to_material_map: Dict[str, Dict[str, str]]) -> Optional[str]:
     """
     Retrieves the file path for a specific object and channel from the material map.
 
@@ -37,8 +37,10 @@ def get_file_location(object, channel, object_to_material_map):
             for chan, file in channel_map.items():
                 if channel == chan:
                     return file
+    return None
 
-def create_material(asset_name, package_path):
+
+def create_material(asset_name: str, package_path: str) -> Optional[unreal.Material]:
     """
     Creates a new material asset in the specified package path.
 
@@ -67,7 +69,8 @@ def create_material(asset_name, package_path):
         print("Error: Material creation failed.")
         return None
 
-def import_texture(file_path, destination_path):
+
+def import_texture(file_path: Path, destination_path: str) -> Optional[unreal.Texture]:
     """
     Imports a texture from the specified file path into Unreal Engine.
 
@@ -94,7 +97,8 @@ def import_texture(file_path, destination_path):
         print(f"Error: Texture '{file_path}' import failed.")
         return None
 
-def add_one_texture_to_material(material, texture, channel):
+
+def add_one_texture_to_material(material: unreal.Material, texture: unreal.Texture, channel: unreal.MaterialProperty) -> None:
     """
     Adds a single texture to a material at the specified channel.
 
@@ -114,7 +118,8 @@ def add_one_texture_to_material(material, texture, channel):
         texture_sample.sampler_type = unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL
     editor_subsystem.connect_material_property(texture_sample, "RGB", channel)
 
-def remap_channels(data, remap_dict):
+
+def remap_channels(data: Dict[str, Dict[str, str]], remap_dict: Dict[str, unreal.MaterialProperty]) -> Dict[str, Dict[str, str]]:
     """
     Remaps the channels in the material map based on a provided dictionary.
 
@@ -135,7 +140,8 @@ def remap_channels(data, remap_dict):
         updated_data[obj] = updated_channels
     return updated_data
 
-def add_all_textures_to_material(material, material_map):
+
+def add_all_textures_to_material(material: unreal.Material, material_map: Dict[str, str]) -> None:
     """
     Adds all textures from the material map to the material.
 
@@ -150,7 +156,8 @@ def add_all_textures_to_material(material, material_map):
             if texture:
                 add_one_texture_to_material(material, texture, channel)
 
-def select_json_file():
+
+def select_json_file() -> Optional[str]:
     """Prompts the user to select a JSON file."""
     json_file_path = filedialog.askopenfilename(
         initialdir="N:/GOLEMS_FATE/character",
@@ -165,11 +172,16 @@ def select_json_file():
         return None
 
 
-
-def get_user_input(object_to_material_map):
+def get_user_input(object_to_material_map: Dict[str, Dict[str, str]]) -> tuple[Path, Dict[str, str], str]:
     """
     Prompts the user for asset names based on the number of objects in the JSON file.
-    Returns a list of asset names corresponding to each object.
+    Returns a tuple containing the JSON path, asset names, and content path.
+
+    Args:
+        object_to_material_map (dict): The material mapping loaded from the JSON file.
+
+    Returns:
+        tuple: A tuple containing the JSON path, asset names, and content path.
     """
     selected_paths = unreal.EditorUtilityLibrary.get_selected_folder_paths()
 
@@ -185,6 +197,9 @@ def get_user_input(object_to_material_map):
 
     json_file_path = select_json_file()
 
+    if json_file_path is None:
+        raise ValueError("No JSON file selected.")
+    
     object_to_material_map = get_material_map(Path(json_file_path))
 
     asset_names = {}
@@ -199,7 +214,7 @@ def get_user_input(object_to_material_map):
     return Path(json_file_path), asset_names, content_path
 
 
-def show_start_dialog():
+def show_start_dialog() -> bool:
     """
     Displays a dialog asking the user if they want to proceed.
     Returns True if the user agrees, False if they cancel.
@@ -226,7 +241,7 @@ def show_start_dialog():
     return user_choice["continue"]
 
 
-def start_script():
+def start_script() -> None:
     """Main function that orchestrates the process of material creation and texture import."""
     try:
         if not show_start_dialog():
@@ -256,11 +271,9 @@ def start_script():
             if material:
                 print(f"Material {asset_names[obj]} created for {obj}.")
                 add_all_textures_to_material(material, material_map)
-
-    except ValueError as e:
-        unreal.log_error(f"Script aborted: {e}")
     except Exception as e:
-        unreal.log_error(f"Error in script: {e}")
+        unreal.log_error(f"An error occurred: {e}")
+
 
 if __name__ == "__main__":
     start_script()
