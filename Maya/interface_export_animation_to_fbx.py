@@ -80,8 +80,8 @@ class MyWidget(QWidget):
                 "The export was successful!",
                 QMessageBox.Ok
             )
-            self.close()  # Close the current widget
-            self.parentWidget().close()  # Close the parent window (QMainWindow)
+            self.close()  
+            self.parentWidget().close()  
         else:
             QMessageBox.warning(
                 self,
