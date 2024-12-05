@@ -1,14 +1,21 @@
-from PySide6.QtWidgets import QWidget, QPushButton, QMainWindow
+# Standard library imports
+from typing import Optional
+
+# Third-party imports
+from PySide6.QtWidgets import QWidget, QPushButton, QMainWindow, QLineEdit, QHBoxLayout, QVBoxLayout, QLabel, QFileDialog
+from PySide6.QtCore import Qt, QTimer
 from shiboken6 import wrapInstance
 import maya.OpenMayaUI as omui
-from PySide6.QtWidgets import QLineEdit, QHBoxLayout, QVBoxLayout, QLabel, QFileDialog
-from PySide6.QtCore import Qt, QTimer
 
+# Local application imports
 import export_material_map as export
 
 
 class Widget(QWidget):
-    def __init__(self):
+    def __init__(self) -> None:
+        """
+        Initializes the widget with UI components such as buttons, labels, and layouts.
+        """
         super().__init__()
 
         self.setWindowTitle("Title")
@@ -38,14 +45,14 @@ class Widget(QWidget):
         v_layout.addWidget(self.open_explorer_button)
         v_layout.addLayout(h_layout)
 
-        # Set alignment to the top of the window
         v_layout.setAlignment(Qt.AlignTop)
 
         self.setLayout(v_layout)
         
-        
-    def button_clicked(self):
-
+    def button_clicked(self) -> None:
+        """
+        Opens a file dialog to select a save location for the JSON file.
+        """
         file_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", "JSON Files (*.json)")
 
         if file_path:
@@ -55,50 +62,69 @@ class Widget(QWidget):
             self.destination_label.setText("Nothing selected")
             self.destination_label.setStyleSheet("font-style: italic; color: gray;")
             
-    def cancel_button_clicked(self):
-        # Close the parent window (MyWindow) by accessing the parent
-        parent = self.parentWidget()  # Get the parent widget
+    def cancel_button_clicked(self) -> None:
+        """
+        Closes the parent window when the cancel button is clicked.
+        """
+        parent = self.parentWidget()
         if parent:
-            parent.close()  # Close the parent window
+            parent.close()
 
-
-    def done_button_clicked(self):
-        
+    def done_button_clicked(self) -> None:
+        """
+        Executes the action of saving the data to the selected path when the done button is clicked.
+        """
         parent = self.parentWidget()
         output_path = self.destination_label.text()
-
 
         if self.destination_label.text() == "Nothing selected":
             self.highlight_button(self.open_explorer_button)
             print("No destination selected.")
         else:
             print(f"Destination saved at: {self.destination_label.text()}")
-
             parent.close()
             export.execute(output_path)
 
-    
-            
-    def reset_button(self, button):
-        """Reset the button's appearance after highlighting."""
-        button.setStyleSheet("")  # Reset the style to default
+    def reset_button(self, button: QPushButton) -> None:
+        """
+        Resets the button's appearance after highlighting.
         
-    def highlight_button(self, button):
-        """Temporarily change the button's background color to highlight it."""
-        # Change the button's background color to grab attention
+        Args:
+            button (QPushButton): The button whose appearance needs to be reset.
+        """
+        button.setStyleSheet("")
+        
+    def highlight_button(self, button: QPushButton) -> None:
+        """
+        Temporarily highlights the button by changing its background color.
+        
+        Args:
+            button (QPushButton): The button to highlight.
+        """
         button.setStyleSheet("background-color: #a0bdb8;")
 
-        # Set a timer to reset the button's style after 500 ms
         QTimer.singleShot(500, lambda: self.reset_button(button))
 
 
-def maya_main_window():
-    """Get the Maya main window as a Qt object."""
+def maya_main_window() -> QWidget:
+    """
+    Retrieves the Maya main window as a Qt object, allowing PySide6 integration.
+
+    Returns:
+        QWidget: The main window of Maya wrapped as a Qt widget.
+    """
     main_window_ptr = omui.MQtUtil.mainWindow()
     return wrapInstance(int(main_window_ptr), QWidget)
 
+
 class MyWindow(QMainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, parent: Optional[QWidget] = None) -> None:
+        """
+        Initializes the main window for the application.
+
+        Args:
+            parent (Optional[QWidget]): The parent widget, usually the Maya main window.
+        """
         super(MyWindow, self).__init__(parent)
 
         self.setWindowTitle("Save JSON file")
@@ -107,11 +133,14 @@ class MyWindow(QMainWindow):
         widget = Widget()
         self.setCentralWidget(widget)
 
-def execute():
+
+def execute() -> None:
+    """
+    Executes the main workflow: creating and displaying the window, 
+    and running the export process upon user interaction.
+    """
     print("Geschafft")
-    # Get Maya's main window as the parent
     parent = maya_main_window()
 
-    # Create and show the window
     window = MyWindow(parent=parent)
     window.show()
