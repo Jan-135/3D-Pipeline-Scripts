@@ -10,7 +10,8 @@ main
 │   └── export_animation_to_fbx.py
 ├── Maya
 │   ├── export_animation_to_fbx.py
-│   └── export_material_map.py
+│   ├── export_material_map.py
+│   └── interface_export_material_map.py
 ├── Unreal
 │   ├── import_fbx_animation.py
 │   └── import_material_mapping.py
@@ -35,13 +36,17 @@ main
    
 3. **export_material_map.py**  
    - Captures the material texture locations from Maya shaders and stores them in a JSON file.
+  
+4. **interface_export_material_map.py**  
+   - opens a GUI to get the users input
+   - executes `export_material_map.py`
 
 ### Unreal
-4. **import_fbx_animation.py**  
+5. **import_fbx_animation.py**  
    - Imports `.fbx` animations into Unreal Engine, maintaining directory structures and file versions.
    - Uses the prebuilt directory structure created by the `export_animation_to_fbx.py` scripts.
 
-5. **import_material_mapping.py**  
+6. **import_material_mapping.py**  
    - Imports material mappings from JSON files into Unreal Engine, reconstructing shaders using the stored data.
 
 ### Examples
