@@ -1,13 +1,9 @@
 from pathlib import Path
 import json
 import pymel.core as pc
-
-import maya.OpenMayaUI as omui
-
-
 from typing import List, Dict, Optional
 
-def get_materials(shape):
+def get_materials(shape: pc.nodetypes.Mesh) -> List[pc.nodetypes.ShadingEngine]:
     """
     Retrieves all materials connected to the provided shape node.
     
@@ -15,7 +11,7 @@ def get_materials(shape):
         shape (Shape): The shape node to process.
 
     Returns:
-        List[ShadingNode]: A list of material nodes connected to the shape.
+        List[ShadingEngine]: A list of material nodes connected to the shape.
     """
     shading_groups = shape.listConnections(type="shadingEngine")
     materials = []
@@ -23,13 +19,12 @@ def get_materials(shape):
         materials.extend(sg.surfaceShader.listConnections())
     return materials
 
-
-def get_file(material, channel: str) -> Optional[str]:
+def get_file(material: pc.nodetypes.ShadingEngine, channel: str) -> Optional[str]:
     """
     Gets the file path of a texture connected to a specified material channel.
 
     Args:
-        material (ShadingNode): The material node to check.
+        material (ShadingEngine): The material node to check.
         channel (str): The material channel to query (e.g., "baseColor").
 
     Returns:
@@ -40,8 +35,7 @@ def get_file(material, channel: str) -> Optional[str]:
         return file_nodes[0].attr("fileTextureName").get()
     return None
 
-
-def get_object_to_material_map(object_list, channel_list: List[str]) -> Dict[str, Dict[str, Optional[str]]]:
+def get_object_to_material_map(object_list: List[pc.nodetypes.Transform], channel_list: List[str]) -> Dict[str, Dict[str, Optional[str]]]:
     """
     Generates a dictionary mapping objects to their materials and associated textures.
     
@@ -53,29 +47,29 @@ def get_object_to_material_map(object_list, channel_list: List[str]) -> Dict[str
         Dict[str, Dict[str, Optional[str]]]: A mapping of object names to their materials and texture file paths.
     """
     object_to_material_map: Dict[str, Dict[str, Optional[str]]] = {}
-    used_shader= []
+    used_shader = set()  # Use a set for faster membership checking
 
     for obj in object_list:
         shape = obj.getShape()
         if not shape:
-            continue
+            continue  # Skip if no shape exists for this object
 
         materials = get_materials(shape)
         if not materials:
-            continue
+            continue  # Skip if no materials are found for this shape
 
-        material = materials[0]
+        material = materials[0]  # Assuming the first material is the primary one
         if material not in used_shader:
-            file_map: Dict[str, Optional[str]] = {
+            # Create a dictionary mapping channels to texture file paths
+            file_map = {
                 channel: get_file(material, channel) for channel in channel_list
             }
             object_to_material_map[obj.name()] = file_map
-            used_shader.append(material)
+            used_shader.add(material)  # Mark the material as used
 
     return object_to_material_map
 
-
-def get_selected_objects():
+def get_selected_objects() -> Optional[List[pc.nodetypes.Transform]]:
     """
     Retrieves all visible objects under the selected group in the scene.
 
@@ -86,14 +80,17 @@ def get_selected_objects():
     if not sel:
         pc.warning("Please select a top-level group.")
         return None
+        
+    output = []
     
-    grp = sel[0]
-    all_transforms = [
-        obj.getParent() for obj in grp.getChildren(ad=True, type="mesh") if not obj.intermediateObject.get()
-    ]
-    filtered_transforms = [obj for obj in all_transforms if obj.visibility.get()]
-    return filtered_transforms
+    for elem in sel:
+        all_transforms = [
+            obj.getParent() for obj in elem.getChildren(ad=True, type="mesh") if not obj.intermediateObject.get()
+        ]
+        filtered_transforms = [obj for obj in all_transforms if obj.visibility.get()]
+        output.extend(filtered_transforms)
 
+    return output
 
 def save_to_json(data: Dict[str, Dict[str, Optional[str]]], path: str) -> None:
     """
@@ -106,7 +103,16 @@ def save_to_json(data: Dict[str, Dict[str, Optional[str]]], path: str) -> None:
     path = Path(path)
     path.write_text(json.dumps(data, indent=4))
 
-def execute(output_path: str):
+def execute(output_path: str) -> bool:
+    """
+    Main function to execute the script: get selected objects, extract material data, and save it to a JSON file.
+
+    Args:
+        output_path (str): Path to save the exported data.
+
+    Returns:
+        bool: True if the process was successful, False if an error occurred.
+    """
     selected_objects = get_selected_objects()
     if not selected_objects:
         pc.warning("No objects selected. Please select at least one object.")
@@ -114,7 +120,11 @@ def execute(output_path: str):
     
     channels: List[str] = ["baseColor", "opacity", "normalCamera", "metalness", "specularRoughness"]
 
+    # Retrieve the mapping of objects to their materials and textures
     object_to_material_map = get_object_to_material_map(selected_objects, channels)
 
+    # Save the data to a JSON file
     save_to_json(object_to_material_map, output_path)
     pc.confirmDialog(title="Success", message=f"Data exported to {output_path}", button=["OK"])
+
+    return True
