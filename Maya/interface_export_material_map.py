@@ -81,9 +81,9 @@ class Widget(QWidget):
             self.highlight_button(self.open_explorer_button)
             print("No destination selected.")
         else:
-            print(f"Destination saved at: {self.destination_label.text()}")
-            parent.close()
-            export.execute(output_path)
+            print(f"Destination set to: {self.destination_label.text()}")
+            if export.execute(output_path):
+                parent.close()
 
     def reset_button(self, button: QPushButton) -> None:
         """
