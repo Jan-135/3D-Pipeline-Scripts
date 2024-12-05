@@ -10,6 +10,7 @@ main
 │   └── export_animation_to_fbx.py
 ├── Maya
 │   ├── export_animation_to_fbx.py
+│   ├── interface_export_animation_to_fbx.py
 │   ├── export_material_map.py
 │   └── interface_export_material_map.py
 ├── Unreal
@@ -32,17 +33,22 @@ main
 2. **export_animation_to_fbx.py**  
    - Similar to the Blender version, this script exports animations from Maya into `.fbx` format.
    - Exported files are saved using a naming converntion and a version control.
-   - Dynamically creates a folder structure on the hard drive. 
+   - Dynamically creates a folder structure on the hard drive.
+  
    
-3. **export_material_map.py**  
+3. **interface_export_material_map.py**  
+   - opens a GUI to get the users input
+   - executes `export_animation_to_fbx.py`
+     
+4. **export_material_map.py**  
    - Captures the material texture locations from Maya shaders and stores them in a JSON file.
   
-4. **interface_export_material_map.py**  
+5. **interface_export_material_map.py**  
    - opens a GUI to get the users input
    - executes `export_material_map.py`
 
 ### Unreal
-5. **import_fbx_animation.py**  
+6. **import_fbx_animation.py**  
    - Imports `.fbx` animations into Unreal Engine, maintaining directory structures and file versions.
    - Uses the prebuilt directory structure created by the `export_animation_to_fbx.py` scripts.
 
