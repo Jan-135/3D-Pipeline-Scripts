@@ -1,6 +1,11 @@
+# Standard library imports
 from pathlib import Path
 import json
+
+# Third-party imports
 import pymel.core as pc
+
+# Typing imports
 from typing import List, Dict, Optional
 
 def get_materials(shape: pc.nodetypes.Mesh) -> List[pc.nodetypes.ShadingEngine]:
@@ -47,25 +52,24 @@ def get_object_to_material_map(object_list: List[pc.nodetypes.Transform], channe
         Dict[str, Dict[str, Optional[str]]]: A mapping of object names to their materials and texture file paths.
     """
     object_to_material_map: Dict[str, Dict[str, Optional[str]]] = {}
-    used_shader = set()  # Use a set for faster membership checking
+    used_shader = set()
 
     for obj in object_list:
         shape = obj.getShape()
         if not shape:
-            continue  # Skip if no shape exists for this object
+            continue
 
         materials = get_materials(shape)
         if not materials:
-            continue  # Skip if no materials are found for this shape
+            continue
 
-        material = materials[0]  # Assuming the first material is the primary one
+        material = materials[0]
         if material not in used_shader:
-            # Create a dictionary mapping channels to texture file paths
             file_map = {
                 channel: get_file(material, channel) for channel in channel_list
             }
             object_to_material_map[obj.name()] = file_map
-            used_shader.add(material)  # Mark the material as used
+            used_shader.add(material)  
 
     return object_to_material_map
 
@@ -120,10 +124,8 @@ def execute(output_path: str) -> bool:
     
     channels: List[str] = ["baseColor", "opacity", "normalCamera", "metalness", "specularRoughness"]
 
-    # Retrieve the mapping of objects to their materials and textures
     object_to_material_map = get_object_to_material_map(selected_objects, channels)
 
-    # Save the data to a JSON file
     save_to_json(object_to_material_map, output_path)
     pc.confirmDialog(title="Success", message=f"Data exported to {output_path}", button=["OK"])
 
