@@ -4,7 +4,8 @@ import maya.OpenMayaUI as omui
 from PySide6.QtWidgets import QLineEdit, QHBoxLayout, QVBoxLayout, QLabel, QFileDialog
 from PySide6.QtCore import Qt, QTimer
 
-import export_material_map as expo
+import export_material_map as export
+
 
 class Widget(QWidget):
     def __init__(self):
@@ -41,7 +42,19 @@ class Widget(QWidget):
         v_layout.setAlignment(Qt.AlignTop)
 
         self.setLayout(v_layout)
+        
+        
+    def button_clicked(self):
 
+        file_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", "JSON Files (*.json)")
+
+        if file_path:
+            self.destination_label.setText(file_path)
+            self.destination_label.setStyleSheet("") 
+        else:
+            self.destination_label.setText("Nothing selected")
+            self.destination_label.setStyleSheet("font-style: italic; color: gray;")
+            
     def cancel_button_clicked(self):
         # Close the parent window (MyWindow) by accessing the parent
         parent = self.parentWidget()  # Get the parent widget
@@ -62,7 +75,7 @@ class Widget(QWidget):
             print(f"Destination saved at: {self.destination_label.text()}")
 
             parent.close()
-            expo.execute()
+            export.execute(output_path)
 
     
             
@@ -94,9 +107,11 @@ class MyWindow(QMainWindow):
         widget = Widget()
         self.setCentralWidget(widget)
 
-# Get Maya's main window as the parent
-parent = maya_main_window()
+def execute():
+    print("Geschafft")
+    # Get Maya's main window as the parent
+    parent = maya_main_window()
 
-# Create and show the window
-window = MyWindow(parent=parent)
-window.show()
+    # Create and show the window
+    window = MyWindow(parent=parent)
+    window.show()

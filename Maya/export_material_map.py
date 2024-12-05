@@ -2,11 +2,12 @@ from pathlib import Path
 import json
 import pymel.core as pc
 
+import maya.OpenMayaUI as omui
+
 
 from typing import List, Dict, Optional
 
-
-def get_materials(shape: Shape):
+def get_materials(shape):
     """
     Retrieves all materials connected to the provided shape node.
     
@@ -17,7 +18,7 @@ def get_materials(shape: Shape):
         List[ShadingNode]: A list of material nodes connected to the shape.
     """
     shading_groups = shape.listConnections(type="shadingEngine")
-    materials: List[ShadingNode] = []
+    materials = []
     for sg in shading_groups:
         materials.extend(sg.surfaceShader.listConnections())
     return materials
@@ -52,10 +53,10 @@ def get_object_to_material_map(object_list, channel_list: List[str]) -> Dict[str
         Dict[str, Dict[str, Optional[str]]]: A mapping of object names to their materials and texture file paths.
     """
     object_to_material_map: Dict[str, Dict[str, Optional[str]]] = {}
-    used_shader: List[ShadingNode] = []
+    used_shader= []
 
     for obj in object_list:
-        shape: Optional[Shape] = obj.getShape()
+        shape = obj.getShape()
         if not shape:
             continue
 
@@ -105,65 +106,15 @@ def save_to_json(data: Dict[str, Dict[str, Optional[str]]], path: str) -> None:
     path = Path(path)
     path.write_text(json.dumps(data, indent=4))
 
-
-def create_ui() -> None:
-    """
-    Creates a UI for exporting material information. 
-    The user can select channels and specify the output file path.
-    """
-
-    export_window = pc.window("exportUI", title="Export Material Info", widthHeight=(300, 400))
-    with pc.columnLayout(adjustableColumn=True):
-        pc.text(label="Select Channels:")
-        channel_checkboxes: Dict[str, pc.uitypes.CheckBox] = {}
-        channels: List[str] = ["baseColor", "opacity", "normalCamera", "metalness", "specularRoughness"]
-
-        for channel in channels:
-            channel_checkboxes[channel] = pc.checkBox(label=channel, value=True)
-
-        pc.separator(height=10)
-        pc.text(label="Output File Path:")
-        output_path_field: pc.uitypes.TextField = pc.textField(text=r"N:\GOLEMS_FATE\material_info.json")
-
-        pc.separator(height=10)
-        pc.button(label="Export", command=lambda *args: export_data(channel_checkboxes, output_path_field))
-
-    pc.showWindow(export_window)
-
-
-def export_data(channel_checkboxes: Dict[str, pc.uitypes.CheckBox], output_path_field: pc.uitypes.TextField) -> None:
-    """
-    Gathers material data for the selected objects and saves it to a JSON file.
-    
-    Args:
-        channel_checkboxes (Dict[str, pc.uitypes.CheckBox]): Dictionary of checkboxes for material channels.
-        output_path_field (pc.uitypes.TextField): TextField for specifying the output file path.
-    """
+def execute(output_path: str):
     selected_objects = get_selected_objects()
     if not selected_objects:
         pc.warning("No objects selected. Please select at least one object.")
-        return
+        return False
+    
+    channels: List[str] = ["baseColor", "opacity", "normalCamera", "metalness", "specularRoughness"]
 
-    selected_channels: List[str] = [
-        channel for channel, checkbox in channel_checkboxes.items() if checkbox.getValue()
-    ]
+    object_to_material_map = get_object_to_material_map(selected_objects, channels)
 
-    if not selected_channels:
-        pc.warning("No channels selected. Please select at least one channel.")
-        return
-
-    output_path: str = pc.textField(output_path_field, query=True, text=True)
-    if not output_path:
-        pc.warning("No output path specified.")
-        return
-
-    try:
-        object_to_material_map = get_object_to_material_map(selected_objects, selected_channels)
-        save_to_json(object_to_material_map, output_path)
-        pc.confirmDialog(title="Success", message=f"Data exported to {output_path}", button=["OK"])
-    except RuntimeError as e:
-        pc.error(f"Failed to export data: {e}")
-
-
-if __name__ == "__main__":
-    create_ui()
+    save_to_json(object_to_material_map, output_path)
+    pc.confirmDialog(title="Success", message=f"Data exported to {output_path}", button=["OK"])
