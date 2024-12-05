@@ -4,6 +4,8 @@ import maya.OpenMayaUI as omui
 from PySide6.QtWidgets import QLineEdit, QHBoxLayout, QVBoxLayout, QLabel, QFileDialog
 from PySide6.QtCore import Qt, QTimer
 
+import export_material_map as expo
+
 class Widget(QWidget):
     def __init__(self):
         super().__init__()
@@ -50,24 +52,19 @@ class Widget(QWidget):
     def done_button_clicked(self):
         
         parent = self.parentWidget()
+        output_path = self.destination_label.text()
+
+
         if self.destination_label.text() == "Nothing selected":
             self.highlight_button(self.open_explorer_button)
-
-
             print("No destination selected.")
         else:
             print(f"Destination saved at: {self.destination_label.text()}")
+
             parent.close()
+            expo.execute()
 
-    def button_clicked(self):
-        file_path, _ = QFileDialog.getSaveFileName(self, "Save File", "default.json", "JSON Files (*.json)")
-
-        if file_path:
-            self.destination_label.setText(file_path)
-            self.destination_label.setStyleSheet("")
-        else:
-            self.destination_label.setText("Nothing selected")
-            self.destination_label.setStyleSheet("font-style: italic; color: gray;")
+    
             
     def reset_button(self, button):
         """Reset the button's appearance after highlighting."""

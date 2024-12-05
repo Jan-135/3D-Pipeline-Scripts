@@ -1,12 +1,12 @@
 from pathlib import Path
 import json
 import pymel.core as pc
-from pymel.core.nodetypes import Shape, ShadingNode
-from pymel.core.general import Transform
+
+
 from typing import List, Dict, Optional
 
 
-def get_materials(shape: Shape) -> List[ShadingNode]:
+def get_materials(shape: Shape):
     """
     Retrieves all materials connected to the provided shape node.
     
@@ -23,7 +23,7 @@ def get_materials(shape: Shape) -> List[ShadingNode]:
     return materials
 
 
-def get_file(material: ShadingNode, channel: str) -> Optional[str]:
+def get_file(material, channel: str) -> Optional[str]:
     """
     Gets the file path of a texture connected to a specified material channel.
 
@@ -40,7 +40,7 @@ def get_file(material: ShadingNode, channel: str) -> Optional[str]:
     return None
 
 
-def get_object_to_material_map(object_list: List[Transform], channel_list: List[str]) -> Dict[str, Dict[str, Optional[str]]]:
+def get_object_to_material_map(object_list, channel_list: List[str]) -> Dict[str, Dict[str, Optional[str]]]:
     """
     Generates a dictionary mapping objects to their materials and associated textures.
     
@@ -74,7 +74,7 @@ def get_object_to_material_map(object_list: List[Transform], channel_list: List[
     return object_to_material_map
 
 
-def get_selected_objects() -> Optional[List[Transform]]:
+def get_selected_objects():
     """
     Retrieves all visible objects under the selected group in the scene.
 
@@ -111,8 +111,6 @@ def create_ui() -> None:
     Creates a UI for exporting material information. 
     The user can select channels and specify the output file path.
     """
-    if pc.window("exportUI", exists=True):
-        pc.deleteUI("exportUI")
 
     export_window = pc.window("exportUI", title="Export Material Info", widthHeight=(300, 400))
     with pc.columnLayout(adjustableColumn=True):
