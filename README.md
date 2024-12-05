@@ -1,6 +1,6 @@
 # Python Tools for Animation and Material Management in 3D Pipelines
 
-This repository contains Python scripts to streamline workflows between **Blender**, **Maya**, and **Unreal Engine**. These tools simplify exporting animations and materials, importing assets into Unreal Engine, and maintaining a cohesive pipeline.
+This repository contains Python scripts to streamline workflows between **Blender**, **Maya**, and **Unreal Engine**. These tools simplify exporting animations and materials, importing those assets into Unreal Engine, and maintaining a cohesive pipeline.
 
 ## 📂 File Structure
 
