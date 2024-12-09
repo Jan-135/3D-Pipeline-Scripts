@@ -71,7 +71,7 @@ While the repository is accessible, its scripts assume familiarity with the corr
 - Simplify directory structures and reduce manual file management.
 
 
-## License
+## MIT License
 
 Copyright (c) 2024 Jan Ferber
 
