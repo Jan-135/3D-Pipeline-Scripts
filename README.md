@@ -97,10 +97,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 This project makes use of third-party libraries with their own licenses. Please review the licenses of the libraries and tools used.
 
-- **PySide6**
-- **Maya (Autodesk)**
-- **Unreal Engine**
-- **Blender Python API**
+- [**PySide6**](https://github.com/LumaPictures/pymel/tree/master)
+- [**Maya (Autodesk)**](https://help.autodesk.com/view/MAYAUL/2024/ENU/?guid=Maya_SDK_Maya_Python_API_Maya_Python_API_2_0_html)
+- [**Unreal Engine**](https://dev.epicgames.com/documentation/en-us/unreal-engine/python-api/?application_version=5.5)
+- [**Blender Python API**](https://docs.blender.org/api/current/index.html)
 
 By using this software, you agree to comply with the terms of these licenses for the respective libraries.
 
