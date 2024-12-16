@@ -1,0 +1,58 @@
+{
+    "reference:bird_uv_basemodel_with_seperated_feathers:eye": {
+        "baseColor": "C:/Users/leonw/Desktop/bird_new//sourceimages/textures/eye/eye_color.psd",
+        "opacity": null,
+        "normalCamera": null,
+        "metalness": null,
+        "specularRoughness": null
+    },
+    "reference:bird_uv_basemodel_with_seperated_feathers:feather_left_bot_short|reference:bird_uv_basemodel_with_seperated_feathers:feather_bot_short|reference:bird_uv_basemodel_with_seperated_feathers:feather_bot_short": {
+        "baseColor": "C:/Users/leonw/Desktop/bird_new//sourceimages/textures/feathers_short/feathers_bot_short_uv.psd",
+        "opacity": null,
+        "normalCamera": "C:/Users/leonw/Desktop/bird_new//sourceimages/textures/feathers_short/feather_bot_small_normalmap.png",
+        "metalness": null,
+        "specularRoughness": null
+    },
+    "reference:bird_uv_basemodel_with_seperated_feathers:feather_right_bot_middle3": {
+        "baseColor": "C:/Users/leonw/Desktop/bird_new//sourceimages/textures/feathers_middle/feathers_bot_middle_uv_color.psd",
+        "opacity": null,
+        "normalCamera": "C:/Users/leonw/Desktop/bird_new//sourceimages/textures/feathers_middle/feathers_bot_middle_normalmap.png",
+        "metalness": null,
+        "specularRoughness": null
+    },
+    "reference:bird_uv_basemodel_with_seperated_feathers:wing_left|reference:bird_uv_basemodel_with_seperated_feathers:feather_left_short|reference:bird_uv_basemodel_with_seperated_feathers:feather_left_short|reference:bird_uv_basemodel_with_seperated_feathers:polySurface116|reference:bird_uv_basemodel_with_seperated_feathers:polySurface116": {
+        "baseColor": "C:/Users/leonw/Desktop/bird_new//sourceimages/textures/feathers_short/feathers_short_uv_short.psd",
+        "opacity": null,
+        "normalCamera": "C:/Users/leonw/Desktop/bird_new//sourceimages/textures/feathers_short/feathers_short_uv_short_normal.png",
+        "metalness": null,
+        "specularRoughness": null
+    },
+    "reference:bird_uv_basemodel_with_seperated_feathers:feather_middle|reference:bird_uv_basemodel_with_seperated_feathers:polySurface59|reference:bird_uv_basemodel_with_seperated_feathers:polySurface59": {
+        "baseColor": "C:/Users/leonw/Desktop/bird_new//sourceimages/textures/feathers_middle/feathers_middle_uv_color.psd",
+        "opacity": null,
+        "normalCamera": "C:/Users/leonw/Desktop/bird_new//sourceimages/textures/feathers_middle/feathers_middle_normalmap.png",
+        "metalness": null,
+        "specularRoughness": null
+    },
+    "reference:bird_uv_basemodel_with_seperated_feathers:feather_long|reference:bird_uv_basemodel_with_seperated_feathers:polySurface1|reference:bird_uv_basemodel_with_seperated_feathers:polySurface1": {
+        "baseColor": "C:/Users/leonw/Desktop/bird_new//sourceimages/textures/feathers_long/feathers_long_uv_color.psd",
+        "opacity": null,
+        "normalCamera": "C:/Users/leonw/Desktop/bird_new//sourceimages/textures/body/NormalMap.png",
+        "metalness": null,
+        "specularRoughness": null
+    },
+    "reference:bird_uv_basemodel_with_seperated_feathers:polySurface133": {
+        "baseColor": "C:/Users/leonw/Desktop/bird_new//sourceimages/textures/feathers_tail/feathers_tail_uv_color.psd",
+        "opacity": null,
+        "normalCamera": "C:/Users/leonw/Desktop/bird_new//sourceimages/textures/feathers_tail/tail_normalmap.png",
+        "metalness": null,
+        "specularRoughness": null
+    },
+    "reference:bird_uv_basemodel_with_seperated_feathers2:body": {
+        "baseColor": "C:/Users/leonw/Desktop/bird_new//sourceimages/textures/body/body_uv_color_4_small.psd",
+        "opacity": "C:/Users/leonw/Desktop/bird_new//sourceimages/textures/body/body_uv_alpha_2.psd",
+        "normalCamera": null,
+        "metalness": null,
+        "specularRoughness": null
+    }
+}
